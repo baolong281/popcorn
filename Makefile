@@ -7,7 +7,6 @@ BOOT_DIR=iso
 
 
 all: $(BUILD_DIR)/os.bin
-	cp grub.cfg $(BOOT_DIR)/boot/grub/grub.cfg
 	cp $(BUILD_DIR)/os.bin $(BOOT_DIR)/boot/os.bin
 	grub-mkrescue -o $(BOOT_DIR)/os.iso $(BOOT_DIR)
 
