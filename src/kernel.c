@@ -83,25 +83,57 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
-void terminal_putchar(char c) 
-{
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
-	}
+void empty_last_line() {
+  size_t lrow = (VGA_HEIGHT - 1) * VGA_WIDTH;
+  for(size_t x=0; x < VGA_WIDTH; x++) {
+    terminal_buffer[lrow + x] = vga_entry(' ', terminal_color);
+  }
 }
 
-void terminal_write(const char* data, size_t size) 
+void terminal_clear_newline() {
+  for(size_t y=0; y < VGA_HEIGHT - 1; y++) {
+    size_t org_row = VGA_WIDTH * y;
+    size_t next_row = VGA_WIDTH * (y + 1);
+    for(size_t x = 0; x < VGA_WIDTH; x++) {
+      terminal_buffer[org_row + x] = terminal_buffer[next_row + x];
+    }
+  }
+  empty_last_line();
+}
+
+void terminal_putchar(char c) 
 {
-	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
+
+  if(c == '\n') {
+    terminal_column = 0;
+    if (++terminal_row == VGA_HEIGHT)  {
+      terminal_row  = VGA_HEIGHT - 1;
+      terminal_clear_newline();
+    }
+    return;
+  }
+
+  terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+  if (++terminal_column == VGA_WIDTH) {
+    terminal_column  = VGA_WIDTH - 1;
+    if (++terminal_row == VGA_HEIGHT)  {
+      terminal_row  = VGA_HEIGHT - 1;
+      terminal_clear_newline();
+    }
+  }
+}
+
+
+void terminal_write(const char* data) 
+{
+  while(*data) {
+    terminal_putchar(*data++);
+  }
 }
 
 void terminal_writestring(const char* data) 
 {
-	terminal_write(data, strlen(data));
+	terminal_write(data);
 }
 
 void kernel_main(void) 
@@ -109,6 +141,13 @@ void kernel_main(void)
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!\n");
+    terminal_writestring("first message\n");
+    for(size_t i = 0; i < VGA_HEIGHT; i++) {
+      terminal_writestring("Hello, kernel World!\n");
+    }
+    terminal_writestring("free big don\n");
+    terminal_writestring("test string\n");
+    terminal_writestring("wilco\n");
+    terminal_writestring("yankee hotel foxtrot\n");
+    terminal_writestring("shoutout bladee\n");
 }
