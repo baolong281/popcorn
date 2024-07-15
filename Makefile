@@ -1,65 +1,60 @@
-# ASM=i686-elf-as
-# CC=i686-elf-gcc
-#
-# KERNEL_DIR=kernel
-# BUILD_DIR=build
-# BOOT_DIR=iso
-#
-# C_SOURCE=$(wildcard $(KERNEL_DIR)/*.c)
-# ASM_SOURCE=$(wildcard $(KERNEL_DIR)/*.asm)
-#
-# OBJS=$(patsubst $(KERNEL_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SOURCES)) \
-#      $(patsubst $(KERNEL_DIR)/%.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
-#
-#
-# all: $(BUILD_DIR)/os.bin
-# 	cp $(BUILD_DIR)/os.bin $(BOOT_DIR)/boot/os.bin
-# 	grub-mkrescue -o $(BOOT_DIR)/os.iso $(BOOT_DIR)
-#
-# kernel:
-#
-# $(BUILD_DIR)/os.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
-# 	$(CC) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/os.bin -ffreestanding -O2 -nostdlib $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o -lgcc
-#
-# $(BUILD_DIR)/boot.o: $(SRC_DIR)/boot.asm
-# 	$(ASM) $(SRC_DIR)/boot.asm -o $(BUILD_DIR)/boot.o
-#
-# $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c
-# 	$(CC) -c $(SRC_DIR)/kernel.c -o $(BUILD_DIR)/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-#
-#
 ASM=i686-elf-as
 CC=i686-elf-gcc
 
 KERNEL_DIR=kernel
-BUILD_DIR=build
-BOOT_DIR=iso
+LIBC_DIR=libc
+SYSROOT_DIR=sysroot
+BOOT_DIR=$(SYSROOT_DIR)/usr/boot
+ISO_DIR=iso
+
+LIBC_HEADERS=$(LIBC_DIR)/include
 
 C_SOURCES=$(wildcard $(KERNEL_DIR)/*.c)
 ASM_SOURCES=$(wildcard $(KERNEL_DIR)/*.asm)
+LIBC_SOURCES=$(wildcard $(LIBC_DIR)/*.c)
 
-OBJS=$(patsubst $(KERNEL_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SOURCES)) \
-     $(patsubst $(KERNEL_DIR)/%.asm, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
+OBJS=$(patsubst $(KERNEL_DIR)/%.c, $(BOOT_DIR)/%.o, $(C_SOURCES)) \
+     $(patsubst $(KERNEL_DIR)/%.asm, $(BOOT_DIR)/%.o, $(ASM_SOURCES))
 
-all: $(BUILD_DIR)/os.bin
-	cp $(BUILD_DIR)/os.bin $(BOOT_DIR)/boot/os.bin
-	grub-mkrescue -o $(BOOT_DIR)/os.iso $(BOOT_DIR)
-	grub-file --is-x86-multiboot $(BOOT_DIR)/os.iso
+LIBC_OBJS=$(patsubst $(LIBC_DIR)/%.c, $(SYSROOT_DIR)/usr/lib/%.o, $(LIBC_SOURCES))
 
-$(BUILD_DIR)/os.bin: $(OBJS)
+build: all
+	mkdir -p $(ISO_DIR)
+	mkdir -p $(ISO_DIR)/boot
+	mkdir -p $(ISO_DIR)/boot/grub
+
+	cp $(BOOT_DIR)/os.bin $(ISO_DIR)/boot/os.bin
+	cp grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
+
+	grub-mkrescue -o $(ISO_DIR)/os.iso $(ISO_DIR)
+
+all: headers $(BOOT_DIR)/os.bin libc
+
+$(BOOT_DIR)/os.bin: $(OBJS) $(LIBC_OBJS)
 	$(CC) -T $(KERNEL_DIR)/linker.ld -o $@ -ffreestanding -O2 -nostdlib $^ -lgcc
 
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
-	$(CC) -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+$(BOOT_DIR)/%.o: $(KERNEL_DIR)/%.c 
+	mkdir -p $(SYSROOT_DIR)/usr/boot
+	$(CC) -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra -isystem ./$(SYSROOT_DIR)/usr/include
 
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.asm
+$(SYSROOT_DIR)/usr/boot/%.o: $(KERNEL_DIR)/%.asm
+	mkdir -p $(SYSROOT_DIR)/usr/boot
 	$(ASM) $< -o $@
 
-iso: $(BUILD_DIR)/os.bin
-	cp $(BUILD_DIR)/os.bin $(BOOT_DIR)/boot/os.bin
-	grub-mkrescue -o $(BOOT_DIR)/os.iso $(BOOT_DIR)
+$(SYSROOT_DIR)/usr/lib/%.o: $(LIBC_DIR)/%.c
+	mkdir -p $(SYSROOT_DIR)/usr/lib
+	$(CC) -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -isystem ./$(SYSROOT_DIR)/usr/include
+
+libc: headers $(LIBC_OBJS)
+
+headers: $(LIBC_HEADERS) 
+	mkdir -p $(SYSROOT_DIR)/usr/include
+	cp -r $(LIBC_DIR)/include/* $(SYSROOT_DIR)/usr/include
 
 clean:
-	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/os.bin
+	rm -f $(BOOT_DIR)/*.o $(BOOT_DIR)/os.bin
+	rm -rf $(SYSROOT_DIR)/usr/lib/*.o $(SYSROOT_DIR)/usr/include/*
+	rm -rf $(ISO_DIR)
 
-.PHONY: all clean iso
+.PHONY: all clean iso libc headers
+

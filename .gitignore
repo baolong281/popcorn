@@ -54,3 +54,5 @@ build
 .cache
 *.bin
 *.iso
+.DS_STORE
+sysroot
