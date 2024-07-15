@@ -8,6 +8,7 @@ BOOT_DIR=$(SYSROOT_DIR)/usr/boot
 ISO_DIR=iso
 
 LIBC_HEADERS=$(LIBC_DIR)/include
+KERNEL_HEADERS=$(KERNEL_DIR)/include
 
 C_SOURCES=$(wildcard $(KERNEL_DIR)/*.c)
 ASM_SOURCES=$(wildcard $(KERNEL_DIR)/*.asm)
@@ -47,9 +48,10 @@ $(SYSROOT_DIR)/usr/lib/%.o: $(LIBC_DIR)/%.c
 
 libc: headers $(LIBC_OBJS)
 
-headers: $(LIBC_HEADERS) 
+headers: $(LIBC_HEADERS) $(KERNEL_HEADERS)
 	mkdir -p $(SYSROOT_DIR)/usr/include
 	cp -r $(LIBC_DIR)/include/* $(SYSROOT_DIR)/usr/include
+	cp -r $(KERNEL_HEADERS) $(SYSROOT_DIR)/usr/include/kernel
 
 clean:
 	rm -f $(BOOT_DIR)/*.o $(BOOT_DIR)/os.bin

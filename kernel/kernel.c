@@ -2,7 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "tty.h"
+#include <kernel/tty.h>
+#include <stdio.h>
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -20,12 +21,7 @@
 void kernel_main(void) {
   /* Initialize terminal interface */
   terminal_initialize();
-
-  for (size_t i = 0; i < 80; i++) {
-    terminal_writestring("good morning america!\n");
-    terminal_writestring("good morning america!\n");
-  }
-  terminal_writestring("we did it joe\n");
-  terminal_writestring("the smiths\n");
-  terminal_writestring("yesyeesyesy\n");
+  int n = printf("hello %s", "world\n");
+  int w = printf("%d chars in last%c", n, '\n');
+  printf("%d", w);
 }
