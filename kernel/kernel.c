@@ -1,3 +1,4 @@
+#include <kernel/idt.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -20,11 +21,13 @@
 /* Hardware text mode color constants. */
 
 void kernel_main(void) {
-  init_gdt();
-  /* Initialize terminal interface */
   terminal_initialize();
+  init_gdt();
+  init_idt();
+  /* Initialize terminal interface */
   int n = printf("hello %s", "world\n");
   int w = printf("%d chars in last%c", n, '\n');
   printf("skibidi toilet");
   printf("%d", w);
+  printf("%d", 1 / 0);
 }
