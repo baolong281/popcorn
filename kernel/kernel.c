@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <kernel/gdt.h>
 #include <kernel/tty.h>
 #include <stdio.h>
 
@@ -19,9 +20,11 @@
 /* Hardware text mode color constants. */
 
 void kernel_main(void) {
+  init_gdt();
   /* Initialize terminal interface */
   terminal_initialize();
   int n = printf("hello %s", "world\n");
   int w = printf("%d chars in last%c", n, '\n');
+  printf("skibidi toilet");
   printf("%d", w);
 }
