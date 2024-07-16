@@ -44,8 +44,8 @@ struct tss_entry {
   uint32_t fs;
   uint32_t gs;
   uint32_t ldt;
-  uint16_t trap;
-  uint16_t iomap_base;
+  uint32_t trap;
+  uint32_t iomap_base;
 } __attribute__((packed));
 
 void init_gdt();

@@ -64,9 +64,13 @@ void *memmove(void *dest, const void *src, size_t n) {
 }
 
 void *memset(void *dest, int c, size_t n) {
-  char *to = (char *)dest;
-  while (n--)
-    *to++ = (unsigned char)c;
+  unsigned char *ptr = (unsigned char *)dest;
+  unsigned char value = (unsigned char)c;
+
+  while (n--) {
+    *ptr++ = value;
+  }
+
   return dest;
 }
 

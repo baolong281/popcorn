@@ -23,7 +23,13 @@ void gdt_flush(struct gdt_ptr *ptr) {
                        : "eax", "memory");
 }
 
-void tss_flush() { __asm__ __volatile__("ltr %ax\n\t"); }
+void tss_flush(void) {
+  __asm__ __volatile__("mov $0x2B, %%ax\n\t"
+                       "ltr %%ax"
+                       :
+                       :
+                       : "ax");
+}
 
 void init_gdt() {
   gdt_ptr.limit = (sizeof(struct gdt_entry) * GDT_ENTRIES) - 1;
@@ -47,8 +53,9 @@ void init_gdt() {
   set_gdt_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
   write_tss(5, 0x10, 0x0);
 
-  tss_flush();
+  // gdt has to initialized before tss
   gdt_flush(&gdt_ptr);
+  tss_flush();
 }
 
 void set_gdt_gate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access,
@@ -69,17 +76,15 @@ void set_gdt_gate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access,
 
 void write_tss(uint32_t num, uint16_t ss0, uint32_t esp0) {
   uint32_t base = (uint32_t)&tss_entry;
-  uint32_t limit = base + sizeof(struct tss_entry);
+  uint32_t limit = base + sizeof(tss_entry);
 
-  // 0xE9 = 1110 1001
   set_gdt_gate(num, base, limit, 0xE9, 0x00);
-
-  memset(&tss_entry, 0, sizeof(struct tss_entry));
+  memset(&tss_entry, 0, sizeof(tss_entry));
 
   tss_entry.ss0 = ss0;
   tss_entry.esp0 = esp0;
 
-  tss_entry.cs = 0x08 | 0x03;
+  tss_entry.cs = 0x08 | 0x3;
   tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs =
-      0x10 | 0x03;
+      0x10 | 0x3;
 }
