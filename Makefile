@@ -1,6 +1,8 @@
 ASM=i686-elf-as
 CC=i686-elf-gcc
 
+COMPILE_FLAGS=-g
+
 KERNEL_DIR=kernel
 LIBC_DIR=libc
 SYSROOT_DIR=sysroot
@@ -32,11 +34,11 @@ build: all
 all: headers $(BOOT_DIR)/os.bin libc
 
 $(BOOT_DIR)/os.bin: $(OBJS) $(LIBC_OBJS)
-	$(CC) -T $(KERNEL_DIR)/linker.ld -o $@ -ffreestanding -O2 -nostdlib $^ -lgcc
+	$(CC) -T $(KERNEL_DIR)/linker.ld -o $@ $(COMPILE_FLAGS) -ffreestanding -O2 -nostdlib $^ -lgcc
 
 $(BOOT_DIR)/%.o: $(KERNEL_DIR)/%.c 
 	mkdir -p $(SYSROOT_DIR)/usr/boot
-	$(CC) -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra -isystem ./$(SYSROOT_DIR)/usr/include
+	$(CC) -c $< -o $@ $(COMPILE_FLAGS) -std=gnu99 -ffreestanding -O2 -Wall -Wextra -isystem ./$(SYSROOT_DIR)/usr/include
 
 $(SYSROOT_DIR)/usr/boot/%.o: $(KERNEL_DIR)/%.asm
 	mkdir -p $(SYSROOT_DIR)/usr/boot
@@ -44,7 +46,7 @@ $(SYSROOT_DIR)/usr/boot/%.o: $(KERNEL_DIR)/%.asm
 
 $(SYSROOT_DIR)/usr/lib/%.o: $(LIBC_DIR)/%.c
 	mkdir -p $(SYSROOT_DIR)/usr/lib
-	$(CC) -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -isystem ./$(SYSROOT_DIR)/usr/include
+	$(CC) -c $< -o $@ $(COMPILE_FLAGS) -std=gnu99 -ffreestanding -O2 -Wall -isystem ./$(SYSROOT_DIR)/usr/include
 
 libc: headers $(LIBC_OBJS)
 

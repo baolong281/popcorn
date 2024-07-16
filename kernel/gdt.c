@@ -1,7 +1,12 @@
+#include "include/gdt.h"
 #include <kernel/gdt.h>
+#include <string.h>
 
-struct gdt_entry gdt_entries[5];
+#define GDT_ENTRIES 6
+
+struct gdt_entry gdt_entries[GDT_ENTRIES];
 struct gdt_ptr gdt_ptr;
+struct tss_entry tss_entry;
 
 void gdt_flush(struct gdt_ptr *ptr) {
   __asm__ __volatile__("lgdt (%0)\n\t"
@@ -18,8 +23,10 @@ void gdt_flush(struct gdt_ptr *ptr) {
                        : "eax", "memory");
 }
 
+void tss_flush() { __asm__ __volatile__("ltr %ax\n\t"); }
+
 void init_gdt() {
-  gdt_ptr.limit = (sizeof(struct gdt_entry) * 5) - 1;
+  gdt_ptr.limit = (sizeof(struct gdt_entry) * GDT_ENTRIES) - 1;
   gdt_ptr.base = (unsigned int)&gdt_entries;
 
   // https://wiki.osdev.org/Global_Descriptor_Table
@@ -38,7 +45,9 @@ void init_gdt() {
   // user data segment
   // 0xF2 = 1111 0010
   set_gdt_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
+  write_tss(5, 0x10, 0x0);
 
+  tss_flush();
   gdt_flush(&gdt_ptr);
 }
 
@@ -56,4 +65,21 @@ void set_gdt_gate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access,
 
   gdt_entries[num].flags |= granularity & 0xF0;
   gdt_entries[num].access = access;
+}
+
+void write_tss(uint32_t num, uint16_t ss0, uint32_t esp0) {
+  uint32_t base = (uint32_t)&tss_entry;
+  uint32_t limit = base + sizeof(struct tss_entry);
+
+  // 0xE9 = 1110 1001
+  set_gdt_gate(num, base, limit, 0xE9, 0x00);
+
+  memset(&tss_entry, 0, sizeof(struct tss_entry));
+
+  tss_entry.ss0 = ss0;
+  tss_entry.esp0 = esp0;
+
+  tss_entry.cs = 0x08 | 0x03;
+  tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs =
+      0x10 | 0x03;
 }
