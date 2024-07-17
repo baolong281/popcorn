@@ -25,10 +25,16 @@ struct idt_entry {
   uint16_t offset_high;
 } __attribute__((packed));
 
+// idt and isr
 void init_idt();
 void set_idt_gate(uint8_t num, uint32_t base, uint16_t selector,
                   uint8_t type_attr);
 void isr_handler(struct InterruptRegisters *regs);
+
+// irq
+void irq_install_handler(int irq, void (*handler)(struct InterruptRegisters *));
+void irq_uninstall_handler(int irq);
+void irq_handler(struct InterruptRegisters *regs);
 
 extern void isr0();
 extern void isr1();

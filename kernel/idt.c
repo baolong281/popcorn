@@ -170,14 +170,17 @@ void irq_uninstall_handler(int irq) { irq_routines[irq] = 0; }
 void irq_handler(struct InterruptRegisters *regs) {
   void (*handler)(struct InterruptRegisters *);
 
+  // irq starts at 32, so subtract 32 to index into the array
   handler = irq_routines[regs->int_no - 32];
   if (handler) {
     handler(regs);
   }
 
+  // send end of interrupt signal to the PIC
   if (regs->int_no >= 40) {
     outb(PIC2_COMMAND, 0x20);
   }
 
+  // send end of interrupt signal to the PIC
   outb(PIC1_COMMAND, 0x20);
 }

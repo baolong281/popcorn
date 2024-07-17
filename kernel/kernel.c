@@ -1,4 +1,5 @@
 #include <kernel/idt.h>
+#include <kernel/pit.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -27,7 +28,10 @@ void kernel_main(void) {
   /* Initialize terminal interface */
   int n = printf("hello %s", "world\n");
   int w = printf("%d chars in last%c", n, '\n');
-  printf("skibidi toilet");
-  printf("%d", w);
-  printf("%d", 1 / 0);
+  printf("skibidi toilet ");
+  printf("%d\n", w);
+
+  init_pit();
+  for (;;)
+    ;
 }

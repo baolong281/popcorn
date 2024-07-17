@@ -52,8 +52,9 @@ libc: headers $(LIBC_OBJS)
 
 headers: $(LIBC_HEADERS) $(KERNEL_HEADERS)
 	mkdir -p $(SYSROOT_DIR)/usr/include
+	mkdir -p $(SYSROOT_DIR)/usr/include/kernel
 	cp -r $(LIBC_DIR)/include/* $(SYSROOT_DIR)/usr/include
-	cp -r $(KERNEL_HEADERS) $(SYSROOT_DIR)/usr/include/kernel
+	cp $(KERNEL_HEADERS)/*.h $(SYSROOT_DIR)/usr/include/kernel
 
 clean:
 	rm -f $(BOOT_DIR)/*.o $(BOOT_DIR)/os.bin

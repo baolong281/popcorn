@@ -110,5 +110,24 @@
    "./sysroot/usr/include"
   ],
   "file": "kernel/idt.c"
+ },
+ {
+  "directory": "/Users/dylanh/Projects/popcorn",
+  "arguments": [
+   "i686-elf-gcc",
+   "-c",
+   "kernel/pit.c",
+   "-o",
+   "sysroot/usr/boot/pit.o",
+   "-g",
+   "-std=gnu99",
+   "-ffreestanding",
+   "-O2",
+   "-Wall",
+   "-Wextra",
+   "-isystem",
+   "./sysroot/usr/include"
+  ],
+  "file": "kernel/pit.c"
  }
 ]
