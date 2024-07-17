@@ -85,29 +85,61 @@ IRQ  15,    47
 
 .extern isr_handler
 isr_common_stub:
+/*
+    This interrupt service routine (ISR) common stub handles the low-level mechanics
+    of interrupt handling in an x86 system. Here's a high-level overview:
+
+    1. **Save State**: 
+       - Save the current state of all general-purpose registers and the segment register (DS).
+       - Save the value of the CR2 register, which contains the address causing a page fault.
+
+    2. **Setup Kernel Data Segment**: 
+       - Set up the segment registers (DS, ES, FS, GS) to the kernel data segment to ensure
+         the handler can access the correct memory locations with kernel privileges.
+
+    3. **Call ISR Handler**: 
+       - Pass the current stack pointer to the ISR handler function (`isr_handler`), which will 
+         handle the specifics of the interrupt.
+
+    4. **Restore State**: 
+       - After the ISR handler completes, restore the original segment registers and 
+         the state of all general-purpose registers.
+
+    5. **Resume Execution**: 
+       - Re-enable interrupts and return from the interrupt, restoring the CPU state to 
+         continue execution of the interrupted program.
+
+    This process ensures that the system can handle interrupts effectively while preserving 
+    the state of the CPU and allowing smooth continuation of the interrupted tasks.
+*/
     pusha
     movl %ds, %eax
     pushl %eax
     movl %cr2, %eax
     pushl %eax
+
     movw $0x10, %ax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
-    
+
     pushl %esp
     call isr_handler
+
     addl $8, %esp
     popl %ebx
     movw %bx, %ds
     movw %bx, %es
     movw %bx, %fs
     movw %bx, %gs
+
     popa
     addl $8, %esp
     sti
     iret
+
+
 
 .extern irq_handler
 irq_common_stub:

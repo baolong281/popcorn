@@ -48,6 +48,23 @@ void isr_handler(struct InterruptRegisters *regs) {
     printf("\n");
     puts("Exception. System Halted!");
     puts((const char *)exception_msgs[regs->int_no]);
+    // print all registers
+    printf("eax: %x\n", regs->eax);
+    printf("ebx: %x\n", regs->ebx);
+    printf("ecx: %x\n", regs->ecx);
+    printf("edx: %x\n", regs->edx);
+    printf("esi: %x\n", regs->esi);
+    printf("edi: %x\n", regs->edi);
+    printf("ebp: %x\n", regs->ebp);
+    printf("esp: %x\n", regs->esp);
+    printf("eip: %x\n", regs->eip);
+    printf("cs: %x\n", regs->cs);
+    printf("ds: %x\n", regs->ds);
+    printf("ss: %x\n", regs->ss);
+    printf("eflags: %x\n", regs->eflags);
+    printf("int_no: %x\n", regs->int_no);
+    printf("err_code: %x\n", regs->err_code);
+    printf("cr2: %x\n", regs->cr2);
     for (;;)
       ;
   }
@@ -126,8 +143,8 @@ void init_idt() {
   set_idt_gate(46, (uint32_t)irq14, 0x08, 0x8E);
   set_idt_gate(47, (uint32_t)irq15, 0x08, 0x8E);
 
-  set_idt_gate(31, (uint32_t)isr128, 0x08, 0x8E);
-  set_idt_gate(31, (uint32_t)isr177, 0x08, 0x8E);
+  set_idt_gate(128, (uint32_t)isr128, 0x08, 0x8E);
+  set_idt_gate(177, (uint32_t)isr177, 0x08, 0x8E);
 
   idt_flush((uint32_t)&idtr);
 }

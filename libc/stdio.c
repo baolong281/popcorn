@@ -69,6 +69,36 @@ int printf(const char *__restrict format, ...) {
       ind++;
       break;
     }
+    case 'x': {
+      ind++;
+      int n = va_arg(args, int);
+      if (n == 0) {
+        putchar('0');
+        putchar('x');
+        putchar('0');
+        written += 3;
+        break;
+      }
+      char buffer[12];
+      int i = 2;
+      while (n > 0) {
+        int rem = n % 16;
+        if (rem < 10) {
+          buffer[i++] = '0' + rem;
+        } else {
+          buffer[i++] = 'a' + (rem - 10);
+        }
+        n /= 16;
+      }
+      buffer[i++] = 'x';
+      buffer[i++] = '0';
+      while (i > 0) {
+        putchar(buffer[--i]);
+        written++;
+      }
+
+      break;
+    }
     default: {
       putchar('%');
       putchar(format[ind]);
