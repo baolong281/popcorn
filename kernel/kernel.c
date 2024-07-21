@@ -1,4 +1,5 @@
 #include <kernel/idt.h>
+#include <kernel/keyboard.h>
 #include <kernel/pit.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -32,6 +33,8 @@ void kernel_main(void) {
   printf("%d\n", w);
 
   init_pit();
-  for (;;)
-    ;
+  init_keyboard();
+  printf("keyboard initialized\n");
+  for (;;) {
+  }
 }

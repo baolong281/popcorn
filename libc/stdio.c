@@ -1,5 +1,6 @@
 #include <kernel/tty.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 int putchar(int ic) {
@@ -48,12 +49,20 @@ int printf(const char *__restrict format, ...) {
         break;
       }
 
-      char buffer[10];
+      bool is_negative = n < 0;
+      n = is_negative ? -n : n;
+
+      char buffer[11];
       int i = 0;
       while (n > 0) {
         buffer[i++] = '0' + (n % 10);
         n /= 10;
       }
+
+      if (is_negative) {
+        buffer[i++] = '-';
+      }
+
       while (i > 0) {
         putchar(buffer[--i]);
         written++;

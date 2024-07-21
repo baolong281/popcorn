@@ -129,5 +129,24 @@
    "./sysroot/usr/include"
   ],
   "file": "kernel/pit.c"
+ },
+ {
+  "directory": "/Users/dylanh/Projects/popcorn",
+  "arguments": [
+   "i686-elf-gcc",
+   "-c",
+   "kernel/keyboard.c",
+   "-o",
+   "sysroot/usr/boot/keyboard.o",
+   "-g",
+   "-std=gnu99",
+   "-ffreestanding",
+   "-O2",
+   "-Wall",
+   "-Wextra",
+   "-isystem",
+   "./sysroot/usr/include"
+  ],
+  "file": "kernel/keyboard.c"
  }
 ]

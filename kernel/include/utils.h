@@ -15,6 +15,12 @@ static inline void outb(uint16_t port, uint8_t val) {
    * type */
 }
 
+static inline char inb(uint16_t port) {
+  char rv;
+  __asm__ volatile("inb %w1, %b0" : "=a"(rv) : "Nd"(port));
+  return rv;
+}
+
 struct InterruptRegisters {
   uint32_t cr2;
   uint32_t ds;
