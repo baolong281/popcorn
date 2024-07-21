@@ -40,7 +40,7 @@ void terminal_clear_line() {
   for (size_t y = 0; y < VGA_HEIGHT - 1; y++) {
     uint16_t *ind = terminal_buffer + y * VGA_WIDTH;
     uint16_t *next_ind = terminal_buffer + (y + 1) * VGA_WIDTH;
-    memcpy((void *)ind, (const void *)next_ind, VGA_WIDTH);
+    memcpy((void *)ind, (const void *)next_ind, VGA_WIDTH * 2);
   }
 
   size_t ind = (VGA_HEIGHT - 1) * VGA_WIDTH;
@@ -59,11 +59,26 @@ void terminal_putchar(char c) {
     }
     return;
   }
+  if (c == '\b') {
+    if (terminal_column == 0) {
+      if (terminal_row == 0) {
+        return;
+      }
+      terminal_column = VGA_WIDTH - 1;
+      terminal_row--;
+    } else {
+      terminal_column--;
+    }
+    terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
+    return;
+  }
   terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
   if (++terminal_column == VGA_WIDTH) {
     terminal_column = 0;
-    if (++terminal_row == VGA_HEIGHT)
+    if (++terminal_row == VGA_HEIGHT) {
+      terminal_clear_line();
       terminal_row = VGA_HEIGHT - 1;
+    }
   }
 }
 
