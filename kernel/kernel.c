@@ -1,6 +1,8 @@
 #include <kernel/idt.h>
 #include <kernel/keyboard.h>
+#include <kernel/multiboot.h>
 #include <kernel/pit.h>
+#include <kernel/utils.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -22,18 +24,15 @@
 
 /* Hardware text mode color constants. */
 
-void kernel_main(void) {
+void kernel_main(uint32_t magic, struct multiboot_info *mbd) {
   terminal_initialize();
   init_gdt();
   init_idt();
-  /* Initialize terminal interface */
-  int n = printf("hello %s", "world\n");
-  int w = printf("%d chars in last%c", n, '\n');
-  printf("skibidi toilet ");
-  printf("%d\n", w);
-
   init_pit();
   init_keyboard();
+  /* Make sure the magic number matches for memory mapping*/
+  printf("mods_addr: %x\n", mbd);
+  printf("mods_addr: %x\n", mbd->mods_addr);
   printf("keyboard initialized\n");
   for (;;) {
   }

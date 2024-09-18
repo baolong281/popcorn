@@ -29,4 +29,13 @@ struct InterruptRegisters {
   uint32_t eip, cs, eflags, useresp, ss;
 };
 
+struct muiltiboot_memory_map {
+  unsigned int size;
+  unsigned int base_addr_low;
+  unsigned int base_addr_high;
+  unsigned int length_low;
+  unsigned int length_high;
+  unsigned int type;
+} __attribute__((packed));
+
 #endif
