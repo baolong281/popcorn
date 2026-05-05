@@ -31,8 +31,14 @@ void kernel_main(uint32_t magic, struct multiboot_info *mbd) {
   init_pit();
   init_keyboard();
   /* Make sure the magic number matches for memory mapping*/
-  printf("mods_addr: %x\n", mbd);
-  printf("mods_addr: %x\n", mbd->mods_addr);
+  uint32_t mod1 = *(uint32_t *)(mbd->mods_addr + 4);
+  uint32_t physicalAllocStart = (mod1 + 0xFFF) & ~0xFFF;
+
+  printf("mod1: %d\n", mod1);
+  printf("Physical memory start: %d\n", physicalAllocStart);
+  printf("Physical memory end: %d\n",
+         physicalAllocStart + mbd->mem_upper * 1024);
+
   printf("keyboard initialized\n");
   for (;;) {
   }

@@ -23,7 +23,7 @@ stack_bottom:
 stack_top:
 
 .section .multiboot.text, "a"
-.global _start
+global _start
 .type _start, @function
 _start:
     movl $(initial_page_dir - 0xC0000000), %ecx
@@ -53,8 +53,9 @@ halt:
 .align 4096
 .global initial_page_dir
 initial_page_dir:
-    .long 0b10000011
+    .long 0b10000011 
     .fill 768-1, 4, 0
+
     .long (0 << 22) | 0b10000011
     .long (1 << 22) | 0b10000011
     .long (2 << 22) | 0b10000011
